@@ -34,4 +34,13 @@ ggplot(country_freq, aes(Var1, Freq))+geom_bar(stat="identity", fill='blue') + l
 state_freq <- as.data.frame(table(ufo$state), col.names = c("country", "feq"), fit.empty.names = TRUE)
 ggplot(state_freq, aes(Var1, Freq))+geom_bar(stat="identity", fill='blue') + labs(x = "Country") + labs(y = "Number") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+# Plot ufo sightings by its coordinates and its shapes
+ufo1 <- select(ufo, latitude, longitude, shape)
+ufo1$latitude <- as.numeric(ufo1$latitude)
+ufo1$longitude <- as.numeric(ufo1$longitude)
+ufo1[complete.cases(ufo1), ]
+
+ufo_map <- ggmap(get_googlemap(center = "us", maptype ='terrain',zoom = 2, scale = 2, color = 'color'))
+ufo_map + geom_point(aes(x = longitude, y = latitude, colour = shape), data = ufo1)
+
 
