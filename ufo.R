@@ -38,6 +38,16 @@ names(country_freq) <- c("country", "freq") # rename the column of the new dataf
 country_freq[country_freq$country == "",1] = "others" # rename blank space to others
 ggplot(country_freq, aes(country, freq, fill = country))+geom_bar(stat="identity") + labs(x = "Country") + labs(y = "Number of ufo sightings")
 
+#==========================================================================
+# Visualize the position of ufo sightings shaped "light" and models on top of Google maps 
+#==========================================================================
+ufo2 <- select(ufo, latitude, longitude, shape)
+ufo2 <- ufo2[complete.cases(ufo2), ]
+ufo2$latitude <- as.numeric(as.character(ufo2$latitude))
+ufo2 <- ufo2[ufo2$shape == "light",]
+
+ufo_map <- ggmap(get_googlemap(center = c(lon = 0, lat = 0), maptype ='terrain',zoom = 1, scale = 2, color = 'color'))
+ufo_map + geom_point(aes(x = longitude, y = latitude, colour = shape, alpha = 0.05, shape = "."), data = ufo2)
 
 
 
