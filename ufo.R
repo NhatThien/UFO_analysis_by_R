@@ -74,6 +74,24 @@ alienMoviesByYear <- count(alienMovies, "year")
 alienMoviesByYear <- filter(alienMoviesByYear, year >=1980)
 ggplot(alienMoviesByYear, aes(year, freq)) + geom_col(fill='blue')
 
+#==============================================================
+# Les formes le plus observés et leurs évolutions par temps
+#==============================================================
+ufo4 <- ufo
+count_shape <- as.data.frame(table(ufo4$shape))
+colnames(count_shape) <- c("shape", "freq")
+most_shape <- arrange(count_shape, -freq)[1:5,]
+info_mshape <- ufo4[ufo4$shape%in%most_shape$shape,]
+info_mshape$datetime <- as.character(info_mshape$datetime)
+info_mshape$datetime <- as.POSIXct(info_mshape$datetime, format = "%m/%d/%Y %H:%M")
+info_mshape$datetime <- format(info_mshape$datetime, format = "%Y")
+result <- select(info_mshape, datetime, shape)
+result$nombre <- rep(1,nrow(result))
+for_plot <- ddply(result, c("datetime", "shape"), summarise, nb_by_year = sum(nombre))
+for_plot$datetime <- factor(for_plot$datetime)
+ggplot(for_plot, aes(datetime , nb_by_year, fill = shape)) + geom_bar(stat="identity") + facet_wrap("shape", scale = "free", ncol = 1)+ theme(text = element_text(size=8), axis.text.x = element_text(angle = 90, hjust = 2))
+
+
 
 
 
