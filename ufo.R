@@ -91,6 +91,15 @@ for_plot <- ddply(result, c("datetime", "shape"), summarise, nb_by_year = sum(no
 for_plot$datetime <- factor(for_plot$datetime)
 ggplot(for_plot, aes(datetime , nb_by_year, fill = shape)) + geom_bar(stat="identity") + facet_wrap("shape", scale = "free", ncol = 1)+ theme(text = element_text(size=8), axis.text.x = element_text(angle = 90, hjust = 2))
 
+#==================================
+# Number of ufo sightings by shape
+#==================================
+ufo5 <- ufo
+shape_freq <- as.data.frame(table(ufo5$shape), stringsAsFactors = FALSE)
+names(shape_freq) <- c("shape", "freq")
+shape_freq[shape_freq$shape == "",1] = "undefined"
+ggplot(shape_freq, aes(shape, freq, fill = shape)) + geom_bar(stat="identity") + labs(x = "Shape") + labs(y = "Number of ufo sightings") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
 
 
 
