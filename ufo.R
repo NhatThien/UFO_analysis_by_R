@@ -100,8 +100,26 @@ names(shape_freq) <- c("shape", "freq")
 shape_freq[shape_freq$shape == "",1] = "undefined"
 ggplot(shape_freq, aes(shape, freq, fill = shape)) + geom_bar(stat="identity") + labs(x = "Shape") + labs(y = "Number of ufo sightings") + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+#==================================
+# Number of ufo sightings by hours
+#==================================
+# on transforme les dates en objet utilisable
+ufo6 <- ufo
+ufo6$datetime <- mdy_hm(ufo6$datetime)
+# création d'une colonne des heures
+ufo6$h <- hour(ufo6$datetime)
+# on compte les occurences des observations par heure de la journée
+count_h <- count(ufo6$h)
+count_h <- na.omit(count_h)
 
+ggplot(count_h, aes(x, freq, fill = freq)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  theme_minimal() +
+  scale_fill_gradient(low = "orange", high = "black") +
+  scale_x_continuous("Heures", labels = as.character(count_h$x), breaks = count_h$x) 
 
+# nombre d'observations entre 18h et minuit
+sum(count_h[count_h$x == 0 | count_h$x >= 18,]$freq) / sum(count_h$freq)
 
 
 
