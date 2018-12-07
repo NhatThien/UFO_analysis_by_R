@@ -3,12 +3,13 @@
 #==================
 library(dplyr)
 library(plyr)
+library(tidyverse)
 library(ggmap)
 library(ggplot2)
-library(dplyr)
 library(forcats)
 library(ggrepel)
 library(xts)
+library(lubridate)
 
 # D. Kahle and H. Wickham.
 # ggmap: Spatial Visualization with ggplot2.
@@ -28,18 +29,19 @@ register_google('AIzaSyAXCTrJ4tFykm-vdfvURGzhKVRkZISGnrY')
 
 # read dataset
 ufo <- read.csv(file="/home/xin/Documents/R_repository/insa/projet/UFO_analysis_by_R/complete.csv", header=T, sep=",")
+movies <- read.csv(file="/home/xin/Documents/R_repository/insa/projet/UFO_analysis_by_R/tmdb_5000_movies.csv", header=T, sep=",")
 
 #================================================
-# Number of ufo sightings by country and plot it
+# Nombre de l'observation d"ufo pour chaque pays
 #================================================
-ufo1 <- ufo # Copy databae
-country_freq <- as.data.frame(table(ufo1$country), stringsAsFactors = FALSE) # counts at each combination of factor levels and convert table to dataframe
-names(country_freq) <- c("country", "freq") # rename the column of the new dataframe
-country_freq[country_freq$country == "",1] = "others" # rename blank space to others
+ufo1 <- ufo # Copie la base de donnée
+country_freq <- as.data.frame(table(ufo1$country), stringsAsFactors = FALSE) # compte les éléments appartenu à chaque niveau de factor
+names(country_freq) <- c("country", "freq") # renomme les colonnes de dataframe
+country_freq[country_freq$country == "",1] = "others" # nomme les case d'anonyme par "others"
 ggplot(country_freq, aes(country, freq, fill = country))+geom_bar(stat="identity") + labs(x = "Country") + labs(y = "Number of ufo sightings")
 
 #==========================================================================
-# Visualize the position of ufo sightings shaped "light" and models on top of Google maps 
+# Visualise la position des ufo en forme de "lights" par google map
 #==========================================================================
 ufo2 <- select(ufo, latitude, longitude, shape)
 ufo2 <- ufo2[complete.cases(ufo2), ]
@@ -49,8 +51,28 @@ ufo2 <- ufo2[ufo2$shape == "light",]
 ufo_map <- ggmap(get_googlemap(center = c(lon = 0, lat = 0), maptype ='terrain',zoom = 1, scale = 2, color = 'color'))
 ufo_map + geom_point(aes(x = longitude, y = latitude, colour = shape, alpha = 0.05, shape = "."), data = ufo2)
 
+#=================================================
+# Nombre de l'observation d"ufo pour chaque année
+#=================================================
+ufo3 <- ufo
+ufo3$year <- year(mdy_hm(ufo3$datetime)) # création d'une colonne sur l'années du sighting
+ufoByYear<-count(ufo3, "year") # on compte le nombre de sighting par an
+ufoByYear<- filter(ufoByYear, year >=1980) # on s'interesse à ceux dont la date est après 1980
+ggplot(ufoByYear, aes(year, freq)) + geom_col(fill='pink') + labs(x = "Year") + labs(y = "Number of ufo sightings")
 
-
+#==============================================================
+# Nombre de sortie des films sur la thématique extraterrestres
+#==============================================================
+#on filtre les films qui ont un rapport avec les extraterrestres
+alienMovies <- filter(movies, str_detect(title,'Aliens?|aliens?') | str_detect(keywords,'space|aliens?|Space|Aliens?') )
+#on rajoute une colonne qui contient l'année de sortie du film
+alienMovies$year <- year(ymd(alienMovies$release_date))
+alienMovies <- select(alienMovies, title, year)
+#on compte le nombre de films d'aliens par année
+alienMoviesByYear <- count(alienMovies, "year")
+#on s'interesse à ceux sortis après 1980
+alienMoviesByYear <- filter(alienMoviesByYear, year >=1980)
+ggplot(alienMoviesByYear, aes(year, freq)) + geom_col(fill='blue')
 
 
 
