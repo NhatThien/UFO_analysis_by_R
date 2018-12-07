@@ -28,8 +28,10 @@ devtools::install_github("dkahle/ggmap", ref = "tidyup")
 register_google('AIzaSyAXCTrJ4tFykm-vdfvURGzhKVRkZISGnrY')
 
 # read dataset
-ufo <- read.csv(file="/home/xin/Documents/R_repository/insa/projet/UFO_analysis_by_R/complete.csv", header=T, sep=",")
-movies <- read.csv(file="/home/xin/Documents/R_repository/insa/projet/UFO_analysis_by_R/tmdb_5000_movies.csv", header=T, sep=",")
+
+# Utilise le chemin absolute pour accedér au dataset
+ufo <- read.csv(file="~/Documents/R_repository/insa/projet/UFO_analysis_by_R/complete.csv", header=T, sep=",")
+movies <- read.csv(file="~/Documents/R_repository/insa/projet/UFO_analysis_by_R/tmdb_5000_movies.csv", header=T, sep=",")
 
 #================================================
 # Nombre de l'observation d"ufo pour chaque pays
@@ -78,13 +80,21 @@ ggplot(alienMoviesByYear, aes(year, freq)) + geom_col(fill='blue')
 # Les formes le plus observés et leurs évolutions par temps
 #==============================================================
 ufo4 <- ufo
+
+# Les 5 formes le plus observés
 count_shape <- as.data.frame(table(ufo4$shape))
 colnames(count_shape) <- c("shape", "freq")
 most_shape <- arrange(count_shape, -freq)[1:5,]
+
+# extraire l'information de ces formes dans ufo dataset
 info_mshape <- ufo4[ufo4$shape%in%most_shape$shape,]
+
+# convertir l'information dans "datetime" en type POSIXct et extraire les années
 info_mshape$datetime <- as.character(info_mshape$datetime)
 info_mshape$datetime <- as.POSIXct(info_mshape$datetime, format = "%m/%d/%Y %H:%M")
 info_mshape$datetime <- format(info_mshape$datetime, format = "%Y")
+
+# Compte le nombre d'observations de ces formes pour chaque année
 result <- select(info_mshape, datetime, shape)
 result$nombre <- rep(1,nrow(result))
 for_plot <- ddply(result, c("datetime", "shape"), summarise, nb_by_year = sum(nombre))
